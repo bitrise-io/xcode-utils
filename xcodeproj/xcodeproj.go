@@ -106,10 +106,10 @@ end
 	}
 
 	projectBase := filepath.Base(projectPth)
-	envs := []string{"project_path=" + projectBase, "LC_ALL=en_US.UTF-8"}
+	envs := append(os.Environ(), "project_path="+projectBase, "LC_ALL=en_US.UTF-8")
 	projectDir := filepath.Dir(projectPth)
 
-	out, err := cmdex.NewCommand("ruby", rubyScriptPth).SetDir(projectDir).AddEnvs(envs...).RunAndReturnTrimmedCombinedOutput()
+	out, err := cmdex.NewCommand("ruby", rubyScriptPth).SetDir(projectDir).SetEnvs(envs).RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
 		if errorutil.IsExitStatusError(err) && out != "" {
 			return errors.New(out)
