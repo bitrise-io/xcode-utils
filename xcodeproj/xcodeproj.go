@@ -105,16 +105,32 @@ end
 		return err
 	}
 
-	projectDir := filepath.Dir(projectPth)
 	projectBase := filepath.Base(projectPth)
-
 	envs := []string{"project_path=" + projectBase, "LC_ALL=en_US.UTF-8"}
+	projectDir := filepath.Dir(projectPth)
+
 	out, err := cmdex.NewCommand("ruby", rubyScriptPth).SetDir(projectDir).AddEnvs(envs...).RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
 		if errorutil.IsExitStatusError(err) && out != "" {
 			return errors.New(out)
 		}
 		return err
+	}
+
+	return nil
+}
+
+// ReCreateWorkspaceUserSchemes ...
+func ReCreateWorkspaceUserSchemes(workspace string) error {
+	projects, err := WorkspaceProjectReferences(workspace)
+	if err != nil {
+		return err
+	}
+
+	for _, project := range projects {
+		if err := ReCreateProjectUserSchemes(project); err != nil {
+			return err
+		}
 	}
 
 	return nil
