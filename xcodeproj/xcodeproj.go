@@ -81,6 +81,9 @@ func WorkspaceSharedSchemeFilePaths(workspacePth string) ([]string, error) {
 		}
 		workspaceSchemeFilePaths = append(workspaceSchemeFilePaths, projectSchemeFilePaths...)
 	}
+
+	sort.Strings(workspaceSchemeFilePaths)
+
 	return workspaceSchemeFilePaths, nil
 }
 
@@ -108,6 +111,9 @@ func WorkspaceSharedSchemes(workspacePth string) ([]string, error) {
 		}
 		workspaceSchemes = append(workspaceSchemes, projectSchemes...)
 	}
+
+	sort.Strings(workspaceSchemes)
+
 	return workspaceSchemes, nil
 }
 
@@ -135,6 +141,9 @@ func WorkspaceUserSchemeFilePaths(workspacePth string) ([]string, error) {
 		}
 		workspaceSchemeFilePaths = append(workspaceSchemeFilePaths, projectSchemeFilePaths...)
 	}
+
+	sort.Strings(workspaceSchemeFilePaths)
+
 	return workspaceSchemeFilePaths, nil
 }
 
@@ -162,6 +171,9 @@ func WorkspaceUserSchemes(workspacePth string) ([]string, error) {
 		}
 		workspaceSchemes = append(workspaceSchemes, projectSchemes...)
 	}
+
+	sort.Strings(workspaceSchemes)
+
 	return workspaceSchemes, nil
 }
 
@@ -299,6 +311,8 @@ func WorkspaceProjectReferences(workspace string) ([]string, error) {
 		}
 	}
 
+	sort.Strings(projects)
+
 	return projects, nil
 }
 
@@ -329,6 +343,9 @@ func filterUserSchemeFilePaths(paths []string) []string {
 			filteredPaths = append(filteredPaths, pth)
 		}
 	}
+
+	sort.Strings(filteredPaths)
+
 	return filteredPaths
 }
 
@@ -350,6 +367,9 @@ func userSchemes(projectOrWorkspacePth string) ([]string, error) {
 	for _, schemePth := range schemePaths {
 		schemes = append(schemes, SchemeNameFromPath(schemePth))
 	}
+
+	sort.Strings(schemes)
+
 	return schemes, nil
 }
 
@@ -366,6 +386,9 @@ func filterSharedSchemeFilePaths(paths []string) []string {
 			filteredPaths = append(filteredPaths, pth)
 		}
 	}
+
+	sort.Strings(filteredPaths)
+
 	return filteredPaths
 }
 
@@ -387,6 +410,9 @@ func sharedSchemes(projectOrWorkspacePth string) ([]string, error) {
 	for _, schemePth := range schemePaths {
 		schemes = append(schemes, SchemeNameFromPath(schemePth))
 	}
+
+	sort.Strings(schemes)
+
 	return schemes, nil
 }
 
