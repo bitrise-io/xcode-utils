@@ -156,8 +156,7 @@ func FilterUserSchemeFilePaths(paths []string) []string {
 	return filteredPaths
 }
 
-// UserSchemeFilePaths ...
-func UserSchemeFilePaths(projectOrWorkspacePth string) ([]string, error) {
+func userSchemeFilePaths(projectOrWorkspacePth string) ([]string, error) {
 	paths, err := filesInDir(projectOrWorkspacePth)
 	if err != nil {
 		return []string{}, err
@@ -165,8 +164,35 @@ func UserSchemeFilePaths(projectOrWorkspacePth string) ([]string, error) {
 	return FilterUserSchemeFilePaths(paths), nil
 }
 
+// ProjectUserSchemeFilePaths ...
+func ProjectUserSchemeFilePaths(projectPth string) ([]string, error) {
+	return userSchemeFilePaths(projectPth)
+}
+
+// WorkspaceUserSchemeFilePaths ...
+func WorkspaceUserSchemeFilePaths(workspacePth string) ([]string, error) {
+	workspaceSchemeFilePaths, err := userSchemeFilePaths(workspacePth)
+	if err != nil {
+		return []string{}, err
+	}
+
+	projects, err := WorkspaceProjectReferences(workspacePth)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, project := range projects {
+		projectSchemeFilePaths, err := userSchemeFilePaths(project)
+		if err != nil {
+			return []string{}, err
+		}
+		workspaceSchemeFilePaths = append(workspaceSchemeFilePaths, projectSchemeFilePaths...)
+	}
+	return workspaceSchemeFilePaths, nil
+}
+
 func userSchemes(projectOrWorkspacePth string) ([]string, error) {
-	schemePaths, err := UserSchemeFilePaths(projectOrWorkspacePth)
+	schemePaths, err := userSchemeFilePaths(projectOrWorkspacePth)
 	if err != nil {
 		return []string{}, err
 	}
