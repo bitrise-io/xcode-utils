@@ -240,8 +240,8 @@ end
 }
 
 // ReCreateWorkspaceUserSchemes ...
-func ReCreateWorkspaceUserSchemes(workspace string) error {
-	projects, err := WorkspaceProjectReferences(workspace)
+func ReCreateWorkspaceUserSchemes(workspacePth string) error {
+	projects, err := WorkspaceProjectReferences(workspacePth)
 	if err != nil {
 		return err
 	}
@@ -270,6 +270,27 @@ func ProjectTargets(projectPth string) ([]string, error) {
 	}
 
 	return pbxprojContentTartgets(content)
+}
+
+// WorkspaceTargets ...
+func WorkspaceTargets(workspacePth string) ([]string, error) {
+	projects, err := WorkspaceProjectReferences(workspacePth)
+	if err != nil {
+		return nil, err
+	}
+
+	targets := []string{}
+	for _, project := range projects {
+		projectTargets, err := ProjectTargets(project)
+		if err != nil {
+			return []string{}, err
+		}
+		targets = append(targets, projectTargets...)
+	}
+
+	sort.Strings(targets)
+
+	return targets, nil
 }
 
 // WorkspaceProjectReferences ...
