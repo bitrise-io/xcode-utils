@@ -8,27 +8,27 @@ import (
 
 func TestIsSharedSchemeFilePath(t *testing.T) {
 	// regexpPattern := filepath.Join(".*[/]?xcshareddata", "xcschemes", ".+[.]xcscheme")
-	require.Equal(t, true, IsSharedSchemeFilePath("/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
-	require.Equal(t, true, IsSharedSchemeFilePath("./BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
-	require.Equal(t, true, IsSharedSchemeFilePath("./xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
-	require.Equal(t, true, IsSharedSchemeFilePath("xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
+	require.Equal(t, true, isSharedSchemeFilePath("/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
+	require.Equal(t, true, isSharedSchemeFilePath("./BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
+	require.Equal(t, true, isSharedSchemeFilePath("./xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
+	require.Equal(t, true, isSharedSchemeFilePath("xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
 
 	// incorrect paths
-	require.Equal(t, false, IsSharedSchemeFilePath("./xcschemes/BitriseXcode7Sample.xcscheme"))
-	require.Equal(t, false, IsSharedSchemeFilePath("./xcshareddata/BitriseXcode7Sample.xcscheme"))
-	require.Equal(t, false, IsSharedSchemeFilePath("./BitriseXcode7Sample.xcscheme"))
-	require.Equal(t, false, IsSharedSchemeFilePath("BitriseXcode7Sample.xcscheme"))
-	require.Equal(t, false, IsSharedSchemeFilePath("xcshareddata/xcschemes/.xcscheme"))
+	require.Equal(t, false, isSharedSchemeFilePath("./xcschemes/BitriseXcode7Sample.xcscheme"))
+	require.Equal(t, false, isSharedSchemeFilePath("./xcshareddata/BitriseXcode7Sample.xcscheme"))
+	require.Equal(t, false, isSharedSchemeFilePath("./BitriseXcode7Sample.xcscheme"))
+	require.Equal(t, false, isSharedSchemeFilePath("BitriseXcode7Sample.xcscheme"))
+	require.Equal(t, false, isSharedSchemeFilePath("xcshareddata/xcschemes/.xcscheme"))
 
 	// user scheme
-	require.Equal(t, false, IsSharedSchemeFilePath("/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, false, isSharedSchemeFilePath("/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
 }
 
 func TestFilterSharedSchemeFilePaths(t *testing.T) {
 	t.Log("it finds shared schemes")
 	{
 		paths := []string{"/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"}
-		filteredPaths := FilterSharedSchemeFilePaths(paths)
+		filteredPaths := filterSharedSchemeFilePaths(paths)
 		require.Equal(t, 1, len(filteredPaths))
 		require.Equal(t, "/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme", filteredPaths[0])
 	}
@@ -39,7 +39,7 @@ func TestFilterSharedSchemeFilePaths(t *testing.T) {
 			"/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme",
 			"/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme",
 		}
-		filteredPaths := FilterSharedSchemeFilePaths(paths)
+		filteredPaths := filterSharedSchemeFilePaths(paths)
 		require.Equal(t, 1, len(filteredPaths))
 		require.Equal(t, "/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme", filteredPaths[0])
 	}
@@ -50,7 +50,7 @@ func TestFilterSharedSchemeFilePaths(t *testing.T) {
 			"./xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme",
 			"./xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme",
 		}
-		filteredPaths := FilterSharedSchemeFilePaths(paths)
+		filteredPaths := filterSharedSchemeFilePaths(paths)
 		require.Equal(t, 1, len(filteredPaths))
 		require.Equal(t, "./xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme", filteredPaths[0])
 	}
@@ -61,7 +61,7 @@ func TestFilterSharedSchemeFilePaths(t *testing.T) {
 			"xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme",
 			"xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme",
 		}
-		filteredPaths := FilterSharedSchemeFilePaths(paths)
+		filteredPaths := filterSharedSchemeFilePaths(paths)
 		require.Equal(t, 1, len(filteredPaths))
 		require.Equal(t, "xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme", filteredPaths[0])
 	}
@@ -72,7 +72,7 @@ func TestFilterSharedSchemeFilePaths(t *testing.T) {
 			"BitriseXcode7Sample.xcscheme",
 			"BitriseXcode7SampleTest.xcscheme",
 		}
-		filteredPaths := FilterSharedSchemeFilePaths(paths)
+		filteredPaths := filterSharedSchemeFilePaths(paths)
 		require.Equal(t, 0, len(filteredPaths))
 	}
 }
@@ -90,30 +90,30 @@ func TestSchemeNameFromPath(t *testing.T) {
 
 func TestIsUserSchemeFilePath(t *testing.T) {
 	// regexpPattern := filepath.Join(".*[/]?xcuserdata", ".*[.]xcuserdatad", "xcschemes", ".+[.]xcscheme")
-	require.Equal(t, true, IsUserSchemeFilePath("/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
-	require.Equal(t, true, IsUserSchemeFilePath("./BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
-	require.Equal(t, true, IsUserSchemeFilePath("./xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
-	require.Equal(t, true, IsUserSchemeFilePath("xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, true, isUserSchemeFilePath("/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, true, isUserSchemeFilePath("./BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, true, isUserSchemeFilePath("./xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, true, isUserSchemeFilePath("xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
 
 	// unknown user
-	require.Equal(t, true, IsUserSchemeFilePath("xcuserdata/.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, true, isUserSchemeFilePath("xcuserdata/.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
 
 	// incorrect paths
-	require.Equal(t, false, IsUserSchemeFilePath("./bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
-	require.Equal(t, false, IsUserSchemeFilePath("./xcuserdata/xcschemes/BitriseXcode7SampleTest.xcscheme"))
-	require.Equal(t, false, IsUserSchemeFilePath("./xcuserdata/bitrise.xcuserdatad/BitriseXcode7SampleTest.xcscheme"))
-	require.Equal(t, false, IsUserSchemeFilePath("BitriseXcode7SampleTest.xcscheme"))
-	require.Equal(t, false, IsUserSchemeFilePath("xcuserdata/bitrise.xcuserdatad/xcschemes/.xcscheme"))
+	require.Equal(t, false, isUserSchemeFilePath("./bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, false, isUserSchemeFilePath("./xcuserdata/xcschemes/BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, false, isUserSchemeFilePath("./xcuserdata/bitrise.xcuserdatad/BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, false, isUserSchemeFilePath("BitriseXcode7SampleTest.xcscheme"))
+	require.Equal(t, false, isUserSchemeFilePath("xcuserdata/bitrise.xcuserdatad/xcschemes/.xcscheme"))
 
 	// shared scheme
-	require.Equal(t, false, IsUserSchemeFilePath("/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
+	require.Equal(t, false, isUserSchemeFilePath("/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme"))
 }
 
 func TestFilterUserSchemeFilePaths(t *testing.T) {
 	t.Log("it finds user schemes")
 	{
 		paths := []string{"/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme"}
-		filteredPaths := FilterUserSchemeFilePaths(paths)
+		filteredPaths := filterUserSchemeFilePaths(paths)
 		require.Equal(t, 1, len(filteredPaths))
 		require.Equal(t, "/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme", filteredPaths[0])
 	}
@@ -124,7 +124,7 @@ func TestFilterUserSchemeFilePaths(t *testing.T) {
 			"/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme",
 			"/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme",
 		}
-		filteredPaths := FilterUserSchemeFilePaths(paths)
+		filteredPaths := filterUserSchemeFilePaths(paths)
 		require.Equal(t, 1, len(filteredPaths))
 		require.Equal(t, "/Users/bitrise/BitriseXcode7Sample.xcodeproj/xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme", filteredPaths[0])
 	}
@@ -135,7 +135,7 @@ func TestFilterUserSchemeFilePaths(t *testing.T) {
 			"./xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme",
 			"./xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme",
 		}
-		filteredPaths := FilterUserSchemeFilePaths(paths)
+		filteredPaths := filterUserSchemeFilePaths(paths)
 		require.Equal(t, 1, len(filteredPaths))
 		require.Equal(t, "./xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme", filteredPaths[0])
 	}
@@ -146,7 +146,7 @@ func TestFilterUserSchemeFilePaths(t *testing.T) {
 			"xcshareddata/xcschemes/BitriseXcode7Sample.xcscheme",
 			"xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme",
 		}
-		filteredPaths := FilterUserSchemeFilePaths(paths)
+		filteredPaths := filterUserSchemeFilePaths(paths)
 		require.Equal(t, 1, len(filteredPaths))
 		require.Equal(t, "xcuserdata/bitrise.xcuserdatad/xcschemes/BitriseXcode7SampleTest.xcscheme", filteredPaths[0])
 	}
@@ -157,7 +157,7 @@ func TestFilterUserSchemeFilePaths(t *testing.T) {
 			"BitriseXcode7Sample.xcscheme",
 			"BitriseXcode7SampleTest.xcscheme",
 		}
-		filteredPaths := FilterUserSchemeFilePaths(paths)
+		filteredPaths := filterUserSchemeFilePaths(paths)
 		require.Equal(t, 0, len(filteredPaths))
 	}
 }
@@ -277,7 +277,7 @@ func TestSchemeFileContentContainsXCTestBuildAction(t *testing.T) {
    </ArchiveAction>
 </Scheme>`
 
-		contains, err := SchemeFileContentContainsXCTestBuildAction(schemeContent)
+		contains, err := schemeFileContentContainsXCTestBuildAction(schemeContent)
 		require.NoError(t, err)
 		require.Equal(t, true, contains)
 	}
@@ -376,7 +376,7 @@ func TestSchemeFileContentContainsXCTestBuildAction(t *testing.T) {
    </ArchiveAction>
 </Scheme>`
 
-		contains, err := SchemeFileContentContainsXCTestBuildAction(schemeContent)
+		contains, err := schemeFileContentContainsXCTestBuildAction(schemeContent)
 		require.NoError(t, err)
 		require.Equal(t, false, contains)
 	}
