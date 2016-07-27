@@ -53,13 +53,39 @@ func FilterSharedSchemeFilePaths(paths []string) []string {
 	return filteredPaths
 }
 
-// SharedSchemeFilePaths ...
-func SharedSchemeFilePaths(projectOrWorkspacePth string) ([]string, error) {
+func sharedSchemeFilePaths(projectOrWorkspacePth string) ([]string, error) {
 	paths, err := filesInDir(projectOrWorkspacePth)
 	if err != nil {
 		return []string{}, err
 	}
 	return FilterSharedSchemeFilePaths(paths), nil
+}
+
+// ProjectSharedSchemeFilePaths ...
+func ProjectSharedSchemeFilePaths(projectPth string) ([]string, error) {
+	return sharedSchemeFilePaths(projectPth)
+}
+
+// WorkspaceSharedSchemeFilePaths ...
+func WorkspaceSharedSchemeFilePaths(workspacePth string) ([]string, error) {
+	workspaceSchemeFilePaths, err := sharedSchemeFilePaths(workspacePth)
+	if err != nil {
+		return []string{}, err
+	}
+
+	projects, err := WorkspaceProjectReferences(workspacePth)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, project := range projects {
+		projectSchemeFilePaths, err := sharedSchemeFilePaths(project)
+		if err != nil {
+			return []string{}, err
+		}
+		workspaceSchemeFilePaths = append(workspaceSchemeFilePaths, projectSchemeFilePaths...)
+	}
+	return workspaceSchemeFilePaths, nil
 }
 
 // SchemeNameFromPath ...
@@ -73,7 +99,7 @@ func SchemeNameFromPath(schemePth string) string {
 }
 
 func sharedSchemes(projectOrWorkspacePth string) ([]string, error) {
-	schemePaths, err := SharedSchemeFilePaths(projectOrWorkspacePth)
+	schemePaths, err := sharedSchemeFilePaths(projectOrWorkspacePth)
 	if err != nil {
 		return []string{}, err
 	}
