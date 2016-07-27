@@ -415,3 +415,82 @@ func TestIsXCWorkspace(t *testing.T) {
 	require.Equal(t, false, IsXCWorkspace("xcworkspace"))
 	require.Equal(t, false, IsXCWorkspace("xcodeproj"))
 }
+
+func TestPBXProjContentTartgets(t *testing.T) {
+	content := `// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXNativeTarget section */
+		BAAFFED019EE788800F3AC91 /* SampleAppWithCocoapods */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BAAFFEF719EE788800F3AC91 /* Build configuration list for PBXNativeTarget "SampleAppWithCocoapods" */;
+			buildPhases = (
+				BAAFFECD19EE788800F3AC91 /* Sources */,
+				BAAFFECE19EE788800F3AC91 /* Frameworks */,
+				BAAFFECF19EE788800F3AC91 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SampleAppWithCocoapods;
+			productName = SampleAppWithCocoapods;
+			productReference = BAAFFED119EE788800F3AC91 /* SampleAppWithCocoapods.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BAAFFEEC19EE788800F3AC91 /* SampleAppWithCocoapodsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BAAFFEFA19EE788800F3AC91 /* Build configuration list for PBXNativeTarget "SampleAppWithCocoapodsTests" */;
+			buildPhases = (
+				75ACE584234D974D15C5CAE9 /* Check Pods Manifest.lock */,
+				BAAFFEE919EE788800F3AC91 /* Sources */,
+				BAAFFEEA19EE788800F3AC91 /* Frameworks */,
+				BAAFFEEB19EE788800F3AC91 /* Resources */,
+				D0F06DBF2FED4262AA6DE7DB /* Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BAAFFEEF19EE788800F3AC91 /* PBXTargetDependency */,
+			);
+			name = SampleAppWithCocoapodsTests;
+			productName = SampleAppWithCocoapodsTests;
+			productReference = BAAFFEED19EE788800F3AC91 /* SampleAppWithCocoapodsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXVariantGroup section */
+		BAAFFEE119EE788800F3AC91 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BAAFFEE219EE788800F3AC91 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		BAAFFEE619EE788800F3AC91 /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BAAFFEE719EE788800F3AC91 /* Base */,
+			);
+			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+	rootObject = BAAFFEC919EE788800F3AC91 /* Project object */;
+}
+`
+
+	targets, err := pbxprojContentTartgets(content)
+	require.NoError(t, err)
+	require.Equal(t, 2, len(targets))
+	require.Equal(t, "SampleAppWithCocoapods", targets[0])
+	require.Equal(t, "SampleAppWithCocoapodsTests", targets[1])
+}
