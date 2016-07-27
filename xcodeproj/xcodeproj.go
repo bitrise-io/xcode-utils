@@ -17,6 +17,16 @@ import (
 	"github.com/going/toolkit/log"
 )
 
+const (
+	// WorkspaceExt ...
+	WorkspaceExt = ".xcworkspace"
+)
+
+// IsWorkspace ...
+func IsWorkspace(pth string) bool {
+	return strings.HasSuffix(pth, WorkspaceExt)
+}
+
 // SharedSchemeFiles ...
 func SharedSchemeFiles(projectOrWorkspacePth string) ([]string, error) {
 	pattern := filepath.Join(projectOrWorkspacePth, "xcshareddata", "xcschemes", "*.xcscheme")
