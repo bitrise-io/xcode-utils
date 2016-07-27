@@ -99,7 +99,7 @@ func SchemeNameFromPath(schemePth string) string {
 }
 
 func sharedSchemes(projectOrWorkspacePth string) ([]string, error) {
-	schemePaths, err := SharedSchemeFilePaths(projectOrWorkspacePth)
+	schemePaths, err := sharedSchemeFilePaths(projectOrWorkspacePth)
 	if err != nil {
 		return []string{}, err
 	}
