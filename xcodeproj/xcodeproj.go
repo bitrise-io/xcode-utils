@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/bitrise-io/go-utils/cmdex"
@@ -24,12 +25,6 @@ const (
 	XCodeProjExt = ".xcodeproj"
 	// XCSchemeExt ...
 	XCSchemeExt = ".xcscheme"
-)
-
-// Path Components
-const (
-	XCSharedData = "xcshareddata"
-	XCSchemes    = "xcschemes"
 )
 
 // IsXCodeProj ...
@@ -86,6 +81,9 @@ func WorkspaceSharedSchemeFilePaths(workspacePth string) ([]string, error) {
 		}
 		workspaceSchemeFilePaths = append(workspaceSchemeFilePaths, projectSchemeFilePaths...)
 	}
+
+	sort.Strings(workspaceSchemeFilePaths)
+
 	return workspaceSchemeFilePaths, nil
 }
 
@@ -113,6 +111,9 @@ func WorkspaceSharedSchemes(workspacePth string) ([]string, error) {
 		}
 		workspaceSchemes = append(workspaceSchemes, projectSchemes...)
 	}
+
+	sort.Strings(workspaceSchemes)
+
 	return workspaceSchemes, nil
 }
 
@@ -140,6 +141,9 @@ func WorkspaceUserSchemeFilePaths(workspacePth string) ([]string, error) {
 		}
 		workspaceSchemeFilePaths = append(workspaceSchemeFilePaths, projectSchemeFilePaths...)
 	}
+
+	sort.Strings(workspaceSchemeFilePaths)
+
 	return workspaceSchemeFilePaths, nil
 }
 
@@ -167,6 +171,9 @@ func WorkspaceUserSchemes(workspacePth string) ([]string, error) {
 		}
 		workspaceSchemes = append(workspaceSchemes, projectSchemes...)
 	}
+
+	sort.Strings(workspaceSchemes)
+
 	return workspaceSchemes, nil
 }
 
@@ -248,6 +255,23 @@ func ReCreateWorkspaceUserSchemes(workspace string) error {
 	return nil
 }
 
+// ProjectTargets ...
+func ProjectTargets(projectPth string) ([]string, error) {
+	pbxProjPth := filepath.Join(projectPth, "project.pbxproj")
+	if exist, err := pathutil.IsPathExists(pbxProjPth); err != nil {
+		return []string{}, err
+	} else if !exist {
+		return []string{}, fmt.Errorf("project.pbxproj does not exist at: %s", pbxProjPth)
+	}
+
+	content, err := fileutil.ReadStringFromFile(pbxProjPth)
+	if err != nil {
+		return []string{}, err
+	}
+
+	return pbxprojContentTartgets(content)
+}
+
 // WorkspaceProjectReferences ...
 func WorkspaceProjectReferences(workspace string) ([]string, error) {
 	projects := []string{}
@@ -287,6 +311,8 @@ func WorkspaceProjectReferences(workspace string) ([]string, error) {
 		}
 	}
 
+	sort.Strings(projects)
+
 	return projects, nil
 }
 
@@ -317,6 +343,9 @@ func filterUserSchemeFilePaths(paths []string) []string {
 			filteredPaths = append(filteredPaths, pth)
 		}
 	}
+
+	sort.Strings(filteredPaths)
+
 	return filteredPaths
 }
 
@@ -338,6 +367,9 @@ func userSchemes(projectOrWorkspacePth string) ([]string, error) {
 	for _, schemePth := range schemePaths {
 		schemes = append(schemes, SchemeNameFromPath(schemePth))
 	}
+
+	sort.Strings(schemes)
+
 	return schemes, nil
 }
 
@@ -354,6 +386,9 @@ func filterSharedSchemeFilePaths(paths []string) []string {
 			filteredPaths = append(filteredPaths, pth)
 		}
 	}
+
+	sort.Strings(filteredPaths)
+
 	return filteredPaths
 }
 
@@ -375,6 +410,9 @@ func sharedSchemes(projectOrWorkspacePth string) ([]string, error) {
 	for _, schemePth := range schemePaths {
 		schemes = append(schemes, SchemeNameFromPath(schemePth))
 	}
+
+	sort.Strings(schemes)
+
 	return schemes, nil
 }
 
@@ -395,4 +433,45 @@ func schemeFileContentContainsXCTestBuildAction(schemeFileContent string) (bool,
 	}
 
 	return false, nil
+}
+
+func pbxprojContentTartgets(pbxprojContent string) ([]string, error) {
+	nativeTargetSectionStart := "/* Begin PBXNativeTarget section */"
+	nativeTargetSectionEnd := "/* End PBXNativeTarget section */"
+
+	regexpPattern := `\s*name = (?P<name>.+);`
+	regexp := regexp.MustCompile(regexpPattern)
+
+	targets := []string{}
+	isTargetSection := false
+
+	scanner := bufio.NewScanner(strings.NewReader(pbxprojContent))
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if strings.TrimSpace(line) == nativeTargetSectionEnd {
+			break
+		}
+
+		if strings.TrimSpace(line) == nativeTargetSectionStart {
+			isTargetSection = true
+		}
+
+		if !isTargetSection {
+			continue
+		}
+
+		if match := regexp.FindStringSubmatch(line); len(match) == 2 {
+			target := match[1]
+			targets = append(targets, target)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return []string{}, err
+	}
+
+	sort.Strings(targets)
+
+	return targets, nil
 }
