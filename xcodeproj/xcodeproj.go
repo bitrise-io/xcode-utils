@@ -72,8 +72,7 @@ func SchemeNameFromPath(schemePth string) string {
 	return strings.TrimSuffix(basename, ext)
 }
 
-// SharedSchemes ...
-func SharedSchemes(projectOrWorkspacePth string) ([]string, error) {
+func sharedSchemes(projectOrWorkspacePth string) ([]string, error) {
 	schemePaths, err := SharedSchemeFilePaths(projectOrWorkspacePth)
 	if err != nil {
 		return []string{}, err
@@ -84,6 +83,33 @@ func SharedSchemes(projectOrWorkspacePth string) ([]string, error) {
 		schemes = append(schemes, SchemeNameFromPath(schemePth))
 	}
 	return schemes, nil
+}
+
+// ProjectSharedSchemes ...
+func ProjectSharedSchemes(projectPth string) ([]string, error) {
+	return sharedSchemes(projectPth)
+}
+
+// WorkspaceSharedSchemes ...
+func WorkspaceSharedSchemes(workspacePth string) ([]string, error) {
+	workspaceSchemes, err := sharedSchemes(workspacePth)
+	if err != nil {
+		return []string{}, err
+	}
+
+	projects, err := WorkspaceProjectReferences(workspacePth)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, project := range projects {
+		projectSchemes, err := sharedSchemes(project)
+		if err != nil {
+			return []string{}, err
+		}
+		workspaceSchemes = append(workspaceSchemes, projectSchemes...)
+	}
+	return workspaceSchemes, nil
 }
 
 // IsUserSchemeFilePath ...
@@ -113,8 +139,7 @@ func UserSchemeFilePaths(projectOrWorkspacePth string) ([]string, error) {
 	return FilterUserSchemeFilePaths(paths), nil
 }
 
-// UserSchemes ...
-func UserSchemes(projectOrWorkspacePth string) ([]string, error) {
+func userSchemes(projectOrWorkspacePth string) ([]string, error) {
 	schemePaths, err := UserSchemeFilePaths(projectOrWorkspacePth)
 	if err != nil {
 		return []string{}, err
@@ -125,6 +150,33 @@ func UserSchemes(projectOrWorkspacePth string) ([]string, error) {
 		schemes = append(schemes, SchemeNameFromPath(schemePth))
 	}
 	return schemes, nil
+}
+
+// ProjectUserSchemes ...
+func ProjectUserSchemes(projectPth string) ([]string, error) {
+	return userSchemes(projectPth)
+}
+
+// WorkspaceUserSchemes ...
+func WorkspaceUserSchemes(workspacePth string) ([]string, error) {
+	workspaceSchemes, err := userSchemes(workspacePth)
+	if err != nil {
+		return []string{}, err
+	}
+
+	projects, err := WorkspaceProjectReferences(workspacePth)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, project := range projects {
+		projectSchemes, err := userSchemes(project)
+		if err != nil {
+			return []string{}, err
+		}
+		workspaceSchemes = append(workspaceSchemes, projectSchemes...)
+	}
+	return workspaceSchemes, nil
 }
 
 // SchemeFileContentContainsXCTestBuildAction ...

@@ -32,9 +32,9 @@ workflows:
             set -ex
 
             go get -u github.com/bitrise-io/go-utils/cmdex
-	        go get -u github.com/bitrise-io/go-utils/errorutil
-	        go get -u github.com/bitrise-io/go-utils/fileutil
-	        go get -u github.com/bitrise-io/go-utils/pathutil
+            go get -u github.com/bitrise-io/go-utils/errorutil
+            go get -u github.com/bitrise-io/go-utils/fileutil
+            go get -u github.com/bitrise-io/go-utils/pathutil
             go get -u github.com/stretchr/testify/require
 
   test:
