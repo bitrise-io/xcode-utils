@@ -172,6 +172,20 @@ func WorkspaceUserSchemes(workspacePth string) ([]string, error) {
 
 // ReCreateProjectUserSchemes ...
 func ReCreateProjectUserSchemes(projectPth string) error {
+	tmpDir, err := pathutil.NormalizedOSTempDirPath("bitrise")
+	if err != nil {
+		return err
+	}
+
+	gemfileContent := `source 'https://rubygems.org'
+
+gem 'xcodeproj'`
+
+	gemfilePth := path.Join(tmpDir, "Gemfile")
+	if err := fileutil.WriteStringToFile(gemfilePth, gemfileContent); err != nil {
+		return err
+	}
+
 	rubyScriptContent := `require 'xcodeproj'
 require 'json'
 
@@ -191,21 +205,16 @@ rescue => ex
 end
 `
 
-	tmpDir, err := pathutil.NormalizedOSTempDirPath("bitrise")
-	if err != nil {
-		return err
-	}
-
 	rubyScriptPth := path.Join(tmpDir, "recreate_user_schemes.rb")
 	if err := fileutil.WriteStringToFile(rubyScriptPth, rubyScriptContent); err != nil {
 		return err
 	}
 
 	projectBase := filepath.Base(projectPth)
-	envs := append(os.Environ(), "project_path="+projectBase, "LC_ALL=en_US.UTF-8")
+	envs := append(os.Environ(), "project_path="+projectBase, "LC_ALL=en_US.UTF-8", "BUNDLE_GEMFILE="+gemfilePth)
 	projectDir := filepath.Dir(projectPth)
 
-	out, err := cmdex.NewCommand("ruby", rubyScriptPth).SetDir(projectDir).SetEnvs(envs).RunAndReturnTrimmedCombinedOutput()
+	out, err := cmdex.NewCommand("bundle", "exec", "ruby", rubyScriptPth).SetDir(projectDir).SetEnvs(envs).RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
 		if errorutil.IsExitStatusError(err) && out != "" {
 			return errors.New(out)
