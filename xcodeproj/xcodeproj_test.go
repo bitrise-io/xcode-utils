@@ -488,9 +488,15 @@ func TestPBXProjContentTartgets(t *testing.T) {
 }
 `
 
-	targets, err := pbxprojContentTartgets(content)
+	targetMap, err := pbxprojContentTartgets(content)
 	require.NoError(t, err)
-	require.Equal(t, 2, len(targets))
-	require.Equal(t, "SampleAppWithCocoapods", targets[0])
-	require.Equal(t, "SampleAppWithCocoapodsTests", targets[1])
+	require.Equal(t, 2, len(targetMap))
+
+	hasXCTest, found := targetMap["SampleAppWithCocoapods"]
+	require.Equal(t, true, found)
+	require.Equal(t, false, hasXCTest)
+
+	hasXCTest, found = targetMap["SampleAppWithCocoapodsTests"]
+	require.Equal(t, true, found)
+	require.Equal(t, true, hasXCTest)
 }
