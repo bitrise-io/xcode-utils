@@ -417,7 +417,62 @@ func TestIsXCWorkspace(t *testing.T) {
 }
 
 func TestPBXProjContentTartgets(t *testing.T) {
-	content := `// !$*UTF8*$!
+	t.Log("target with space")
+	{
+		content := `/* Begin PBXNativeTarget section */
+		BADDF9E61A703F87004C3526 /* BitriseSampleAppsiOS With Spaces */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BADDFA0D1A703F87004C3526 /* Build configuration list for PBXNativeTarget "BitriseSampleAppsiOS With Spaces" */;
+			buildPhases = (
+				BADDF9E31A703F87004C3526 /* Sources */,
+				BADDF9E41A703F87004C3526 /* Frameworks */,
+				BADDF9E51A703F87004C3526 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "BitriseSampleAppsiOS With Spaces";
+			productName = "BitriseSampleAppsiOS With Spaces";
+			productReference = BADDF9E71A703F87004C3526 /* BitriseSampleAppsiOS With Spaces.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BADDFA021A703F87004C3526 /* BitriseSampleAppsiOS With SpacesTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BADDFA101A703F87004C3526 /* Build configuration list for PBXNativeTarget "BitriseSampleAppsiOS With SpacesTests" */;
+			buildPhases = (
+				BADDF9FF1A703F87004C3526 /* Sources */,
+				BADDFA001A703F87004C3526 /* Frameworks */,
+				BADDFA011A703F87004C3526 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BADDFA051A703F87004C3526 /* PBXTargetDependency */,
+			);
+			name = "BitriseSampleAppsiOS With SpacesTests";
+			productName = "BitriseSampleAppsiOS With SpacesTests";
+			productReference = BADDFA031A703F87004C3526 /* BitriseSampleAppsiOS With SpacesTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */`
+
+		targetMap, err := pbxprojContentTartgets(content)
+		require.NoError(t, err)
+		require.Equal(t, 2, len(targetMap))
+
+		hasXCTest, found := targetMap["BitriseSampleAppsiOS With Spaces"]
+		require.Equal(t, true, found)
+		require.Equal(t, false, hasXCTest)
+
+		hasXCTest, found = targetMap["BitriseSampleAppsiOS With SpacesTests"]
+		require.Equal(t, true, found)
+		require.Equal(t, true, hasXCTest)
+	}
+
+	t.Log("simple targets")
+	{
+		content := `// !$*UTF8*$!
 {
 	archiveVersion = 1;
 	classes = {
@@ -488,15 +543,16 @@ func TestPBXProjContentTartgets(t *testing.T) {
 }
 `
 
-	targetMap, err := pbxprojContentTartgets(content)
-	require.NoError(t, err)
-	require.Equal(t, 2, len(targetMap))
+		targetMap, err := pbxprojContentTartgets(content)
+		require.NoError(t, err)
+		require.Equal(t, 2, len(targetMap))
 
-	hasXCTest, found := targetMap["SampleAppWithCocoapods"]
-	require.Equal(t, true, found)
-	require.Equal(t, false, hasXCTest)
+		hasXCTest, found := targetMap["SampleAppWithCocoapods"]
+		require.Equal(t, true, found)
+		require.Equal(t, false, hasXCTest)
 
-	hasXCTest, found = targetMap["SampleAppWithCocoapodsTests"]
-	require.Equal(t, true, found)
-	require.Equal(t, true, hasXCTest)
+		hasXCTest, found = targetMap["SampleAppWithCocoapodsTests"]
+		require.Equal(t, true, found)
+		require.Equal(t, true, hasXCTest)
+	}
 }
